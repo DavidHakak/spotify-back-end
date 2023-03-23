@@ -28,14 +28,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  playlist: [
-    {
-      id: {
-        type: String,
-        unique: true,
-      },
-    },
-  ],
 
   createDate: {
     type: Date,
@@ -53,6 +45,6 @@ const userSchema = new mongoose.Schema({
 });
 
 // ליצור את המודל נתונים (את הטבלה - אוסף)
-const userData = mongoose.model("user", userSchema);
+const UserData = mongoose.model("User", userSchema);
 // ליצא את המודל הנתונים
-module.exports = userData;
+module.exports = UserData;

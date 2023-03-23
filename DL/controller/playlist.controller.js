@@ -8,21 +8,13 @@ async function read(filter, proj) {
   return await playlistData.find(filter, proj);
 }
 
-async function readPlaylistByUser(filter) {
-  return await playlistData
-    .find(filter)
-    .populate("userId", "email permission")
-    .populate("products.product");
+async function readWithPopulate(filter) {
+  const song = await playlistData.find(filter).populate("songsId");
+  return song[0];
 }
 
 async function updateOne(playlistId, newData) {
-  return await playlistData.findOneAndUpdate(playlistId, newData, {
-    new: true,
-  });
-}
-
-async function updateMany(playlistId, newData) {
-  return await playlistData.updateMany(playlistId, newData);
+  return await playlistData.findOneAndUpdate(playlistId, newData);
 }
 
 async function del(filter) {
@@ -32,8 +24,7 @@ async function del(filter) {
 module.exports = {
   del,
   updateOne,
-  updateMany,
   read,
+  readWithPopulate,
   create,
-  readPlaylistByUser,
 };

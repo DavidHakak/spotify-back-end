@@ -1,13 +1,7 @@
 const userData = require("../model/user.model");
 
 async function create(data) {
-  return await userData.create({
-    userFirstName: data.firstName,
-    userLastName: data.lastName,
-    email: data.email,
-    password: data.password,
-    phoneNumber: data.phoneNumber,
-  });
+  return await userData.create(data);
 }
 
 async function read(filter, select) {

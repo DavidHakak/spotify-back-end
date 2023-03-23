@@ -1,7 +1,7 @@
 const userController = require("../DL/controller/user.controller");
 const bcrypt = require("bcrypt");
 const auth = require("../auth");
-const saltRounds = 10;
+const saltRounds = Number(process.env.SALT_ROUNDS);
 
 const getUser = async (filter) => {
   const user = await userController.read(filter);
@@ -32,7 +32,13 @@ async function register(data) {
 
   data.password = hashedPass;
 
-  const newUser = await userController.create(data);
+  const newUser = await userController.create({
+    userFirstName: data.firstName,
+    userLastName: data.lastName,
+    email: data.email,
+    password: data.password,
+    phoneNumber: data.phoneNumber,
+  });
 
   const token = await auth.createToken({
     _id: newUser._id,

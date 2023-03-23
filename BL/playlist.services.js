@@ -1,11 +1,11 @@
-require("dotenv").config();
-require("../DL/db").connect();
 const playlistController = require("../DL/controller/playlist.controller");
+const songsController = require("../DL/controller/songs.controller");
 
 async function createPlaylist(data) {
   try {
     await playlistController.create(data);
-    return await readPlaylistsNamesByUser_id(data.userId);
+    const allPlaylistNames = await readPlaylistsNamesByUser_id(data.userId);
+    return allPlaylistNames;
   } catch (e) {
     console.log(e.message);
   }
@@ -24,17 +24,9 @@ async function readPlaylistsNamesByUser_id(user_Id) {
 
 async function deletePlaylistBy_id(data) {
   try {
-    await playlistController.del({ _id: data.playlist_Id });
-    return await readPlaylistsNamesByUser_id(data.userId);
-  } catch (e) {
-    console.log(e.message);
-  }
-}
-
-async function readPlaylistsByPlaylist_id(playlist_Id) {
-  try {
-    const songs = await playlistController.read({ _id: playlist_Id }, "songs");
-    return await songs[0]["songs"];
+    data.playlist_id !== "" &&
+      (await playlistController.del({ _id: data.playlist_id }));
+    return await readPlaylistsNamesByUser_id(data.user_id);
   } catch (e) {
     console.log(e.message);
   }
@@ -42,11 +34,29 @@ async function readPlaylistsByPlaylist_id(playlist_Id) {
 
 async function createNewSongInPlaylist(data) {
   try {
+    let songExistInDb = await songsController.read({
+      youtubeId: data.youtubeId,
+    });
+    let song_id = "";
+
+    if (songExistInDb.length === 0) {
+      songExistInDb = await songsController.create(data);
+      song_id = songExistInDb._id;
+    } else {
+      song_id = songExistInDb[0]._id;
+    }
+
+    const songExistInPlaylist = await playlistController.read({
+      _id: data.playlist_id,
+      songsId: song_id,
+    });
+
+    if (songExistInPlaylist.length !== 0) throw "song Exist In Playlist";
+
     await playlistController.updateOne(
       { _id: data.playlist_id },
-      { $push: { songs: data.songInfo } }
+      { $push: { songsId: song_id } }
     );
-    return await readPlaylistsNamesByUser_id(data.userId);
   } catch (e) {
     console.log(e.message);
   }
@@ -63,6 +73,17 @@ async function deleteSongFromPlaylist(data) {
       }
     );
     return await readPlaylistsByPlaylist_id(data.playlistId);
+  } catch (e) {
+    console.log(e.message);
+  }
+}
+
+async function readPlaylistsByPlaylist_id(playlist_Id) {
+  try {
+    const allSongs = await playlistController.readWithPopulate({
+      _id: playlist_Id,
+    });
+    return allSongs.songsId;
   } catch (e) {
     console.log(e.message);
   }

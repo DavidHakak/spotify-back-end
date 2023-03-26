@@ -1,28 +1,31 @@
-const err = (c, m) => {
-  return { code: c, message: m };
+const errModel = (code, message) => {
+  return { code: code, message: message };
 };
 
 const errMessage = Object.freeze({
-  MISSING_DATA: err(400, "missing data"),
-  USER_NOT_FOUND: err(400, "user not found"),
-  USER_NOT_AQCTIVE: err(400, "user not active"),
-  USER_ALREADY_REGISTERED: err(400, "user already registered"),
-  USER_NOT_REGISTERED: err(400, "user not registered"),
-  SUCCESS: err(200, "success"),
-  UNAUTHORIZED: err(401, "you need to login first"),
-  WORNG_PASSWORD: err(400, "password is not correct"),
-  PASSWORDS_ARE_NOT_EQUAL: err(400, "passwords are not equal"),
-  TOKEN_DID_NOT_CREATED: err(401, "token didn't created"),
-  PROJECT_NOT_FOUND: err(400, "project not found"),
-  CAN_NOT_GET_URL: err(999, "can't get url"),
-  CAN_NOT_CREATE_FOLDER: err(999, "can't create folder"),
+  USER_ALREADY_REGISTERED: errModel(400, "user already registered"),
+  USER_NOT_FOUND: errModel(400, "user not found"),
+  MISSING_DATA: errModel(400, "missing data"),
+  PASSWORDS_ARE_NOT_EQUAL: errModel(401, "passwords are not equal"),
+  PASSWORDS_ARE_NOT_CORRECT: errModel(401, "email or password do not match"),
+  CAN_NOT_CREATE_TOKEN: errModel(501, "try again later"),
+  THE_SONG_IS_ALREADY_FAVORITE: errModel(999, "the song is already favorite"),
+  CAN_NOT_CREATE_NEW_PLAYLIST: errModel(999, "try again"),
+  THE_SONG_NOT_FOUND: errModel(400, "song not found"),
+  PLAYLIST_NOT_FOUND: errModel(400, "playlist not found"),
+  TRY_AGAIN: errModel(999, "try again"),
+  SONG_IS_EXIST: errModel(999, "song is already exists in the playlist"),
+  UNAUTHORIZED: errModel(401, "unauthorized"),
 });
 
-const sendError = (res, err) => {
-  console.log(err);
-  res.status(err.code || 500).send(err.message || "try agien later");
+const checkData = (data, parameters) => {
+  try {
+    parameters.forEach((parameter) => {
+      if (!data[parameter]) throw errMessage.MISSING_DATA;
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
-module.exports = {
-  errMessage,
-  sendError,
-};
+
+module.exports = { errMessage, checkData };

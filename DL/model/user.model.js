@@ -29,6 +29,8 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 
+  imageData: { type: String, default: "" },
+
   createDate: {
     type: Date,
     default: Date.now,

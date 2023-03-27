@@ -6,7 +6,6 @@ const { checkData } = require("../errController");
 
 router.post("/register", async (req, res) => {
   try {
-    console.log(req.body);
     checkData(req.body, [
       "firstName",
       "lastName",
@@ -34,8 +33,16 @@ router.post("/login", async (req, res) => {
 router.get("/", auth.validToken, async (req, res) => {
   try {
     const user = await userService.getUser({ _id: req.data._id });
-    const newUser = await { _id: user._id, playlist: user.playlist };
-    res.status(200).send(newUser);
+    res.status(200).send(user);
+  } catch (error) {
+    console.log("error", error);
+  }
+});
+
+router.delete("/delete", auth.validToken, async (req, res) => {
+  try {
+    const ifExists = await userService.deleteUser({ _id: req.data._id });
+    res.status(200).send(ifExists);
   } catch (error) {
     console.log("error", error);
   }

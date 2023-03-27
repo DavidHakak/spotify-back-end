@@ -7,12 +7,7 @@ const { errController } = require("../errController");
 const getUser = async (filter) => {
   const user = await userController.read(filter);
   if (!user) throw errController.USER_NOT_FOUND;
-  const isActive = await userController.read({
-    email: user.email,
-    isActive: true,
-  });
-  if (!isActive) throw errController.USER_NOT_FOUND;
-  return user;
+  return { _id: user._id, image: user.imageData };
 };
 
 async function register(data) {
@@ -54,8 +49,6 @@ async function login(data) {
 
   if (!userExists) throw errController.USER_NOT_FOUND;
 
-  if (userExists.isActive === "false") throw errController.USER_NOT_FOUND;
-
   const { password } = data;
 
   const passValidated = await bcrypt.compare(password, userExists.password);
@@ -71,9 +64,17 @@ async function login(data) {
   userExists.password = undefined;
 
   return {
-    user: userExists.firstName,
+    image: userExists.imageData,
+    user: userExists.userFirstName,
     token,
   };
 }
 
-module.exports = { register, login, getUser };
+async function deleteUser(data) {
+  const user = await userController.read(data);
+  if (!user) throw errController.USER_NOT_FOUND;
+  userController.del(data);
+  return true;
+}
+
+module.exports = { register, login, getUser, deleteUser };

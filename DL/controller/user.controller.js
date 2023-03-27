@@ -1,3 +1,4 @@
+const { deleteOne } = require("../model/user.model");
 const userData = require("../model/user.model");
 
 async function create(data) {
@@ -12,8 +13,8 @@ async function update(id, newData) {
   return await userData.updateOne({ _id: id }, newData);
 }
 
-async function del(id) {
-  return await update(id, { isActive: false });
+async function del(filter) {
+  return await userData.deleteOne(filter);
 }
 
 module.exports = { create, read, update, del };

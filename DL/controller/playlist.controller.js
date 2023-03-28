@@ -9,7 +9,7 @@ async function read(filter, proj) {
 }
 
 async function readWithPopulate(filter) {
-  const song = await playlistData.find(filter).populate("songsId");
+  const song = await playlistData.find(filter).populate("songs_id");
   return song[0];
 }
 

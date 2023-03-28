@@ -1,5 +1,4 @@
 const nodeMailer = require("nodemailer");
-const path = require("path");
 
 module.exports = async (emailOptions) => {
   try {

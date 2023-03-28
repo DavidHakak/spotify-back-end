@@ -2,41 +2,31 @@ const userController = require("../DL/controller/user.controller");
 const bcrypt = require("bcrypt");
 const auth = require("../auth");
 const saltRounds = Number(process.env.SALT_ROUNDS);
+const { errController } = require("../errController");
+const {
+  htmlPageForResetPass,
+} = require("../BL/helpers/nodeMailer/views/htmlPages");
 
-const getUser = async (filter) => {
-  const user = await userController.read(filter);
-  if (!user) throw errMessage.USER_NOT_FOUND;
-  const isActive = await userController.read({
-    email: user.email,
-    isActive: true,
-  });
-  if (!isActive) throw errMessage.USER_NOT_FOUND;
-  return user;
-};
+const sendEmail = require("./helpers/nodeMailer/nodeMailer");
+
+async function getUser(filter, select) {
+  const user = await userController.read(filter, select);
+  if (!user) throw errController.USER_NOT_FOUND;
+  return { _id: user._id, image: user.imageData };
+}
 
 async function register(data) {
-  if (
-    !data.firstName ||
-    !data.lastName ||
-    !data.email ||
-    !data.password ||
-    !data.phoneNumber
-  )
-    throw "missing data";
-
   const userExist = await userController.read({ email: data.email });
 
-  if (userExist) throw "user is exist";
+  if (userExist) throw errController.USER_ALREADY_REGISTERED;
 
   const hashedPass = await bcrypt.hash(data.password, saltRounds);
-
-  data.password = hashedPass;
 
   const newUser = await userController.create({
     userFirstName: data.firstName,
     userLastName: data.lastName,
     email: data.email,
-    password: data.password,
+    password: hashedPass,
     phoneNumber: data.phoneNumber,
   });
 
@@ -55,22 +45,18 @@ async function register(data) {
 }
 
 async function login(data) {
-  if (!data.email || !data.password) throw "missing data";
-
   const userExists = await userController.read(
     { email: data.email },
     "+password"
   );
 
-  if (!userExists) throw "user not exists";
-
-  if (userExists.isActive === "false") throw "user not exists";
+  if (!userExists) throw errController.USER_NOT_FOUND;
 
   const { password } = data;
 
   const passValidated = await bcrypt.compare(password, userExists.password);
 
-  if (!passValidated) throw "Password is incorrect";
+  if (!passValidated) throw errController.PASSWORDS_ARE_NOT_CORRECT;
 
   const token = await auth.createToken({
     _id: userExists._id,
@@ -81,9 +67,74 @@ async function login(data) {
   userExists.password = undefined;
 
   return {
-    user: userExists.firstName,
+    image: userExists.imageData,
+    user: userExists.userFirstName,
     token,
   };
 }
 
-module.exports = { register, login, getUser };
+async function deleteUser(data) {
+  const user = await userController.read(data);
+  if (!user) throw errController.USER_NOT_FOUND;
+  userController.del(data);
+  return true;
+}
+
+async function getUserForResetPass(email) {
+  console.log(email);
+  const user = await getUser({ email });
+  const token = bcrypt.hashSync(String(Math.random() * 2345), saltRounds);
+  const done = await userController.update(user._id, {
+    resetPass: token,
+  });
+
+  if (!done) throw "create token for change pass failed";
+
+  const url = `${process.env.BASE_URL}/user/renew/?token=${token}`;
+
+  const emailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "My Playlist reset password",
+    text: "You have requested to reset your password",
+    html: htmlPageForResetPass(url),
+  };
+
+  await sendEmail(emailOptions);
+
+  return "email send to reset password";
+}
+
+async function changePasswordByToken(data) {
+  const equalPass = data.secondPassword === data.firstPassword;
+  if (!equalPass) throw errController.PASSWORDS_ARE_NOT_EQUAL;
+
+  const userExist = await getUser({ resetPass: data.token }, "imageData");
+
+  const hashedPass = await bcrypt.hash(data.firstPassword, saltRounds);
+
+  await userController.update(userExist._id, {
+    password: hashedPass,
+    resetPass: null,
+  });
+
+  const token = await auth.createToken({
+    _id: userExist._id,
+    email: userExist.email,
+    permission: userExist.permission,
+  });
+
+  return {
+    userExist,
+    userToken: token,
+  };
+}
+
+module.exports = {
+  register,
+  login,
+  getUser,
+  deleteUser,
+  getUserForResetPass,
+  changePasswordByToken,
+};

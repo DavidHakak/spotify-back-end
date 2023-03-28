@@ -6,8 +6,8 @@ const app = express();
 const cors = require("cors");
 const PORT = process.env.PORT;
 const userRouter = require("./ROUTES/user.router");
-const playlistRouter = require("./routes/playlist.router");
-const uploadsRouter = require("./routes/uploads.router");
+const playlistRouter = require("./ROUTES/playlist.router");
+const uploadsRouter = require("./ROUTES/uploads.router");
 
 app.use(cors());
 app.use(express.json());

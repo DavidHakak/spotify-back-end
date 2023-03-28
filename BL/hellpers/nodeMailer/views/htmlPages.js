@@ -1,4 +1,4 @@
-const htmlPageForResetPass = (logo, url) => {
+const htmlPageForResetPass = (url) => {
   return ` <html lang="en" dir="rtl">
     <head>
       <meta charset="UTF-8" />
@@ -9,7 +9,7 @@ const htmlPageForResetPass = (logo, url) => {
     <body
       style="
         @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Caveat:wght@500&family=Comic+Neue:wght@300&family=Dosis:wght@300&family=Fira+Sans:wght@300&family=Karantina:wght@300&family=Montserrat:wght@300;500&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Rubik+Vinyl&family=Varela+Round&display=swap');
-        font-family: 'Open Sans', sans-serif;
+        font-family: "Montserrat", sans-serif;
         /* margin: 0; */
         padding: 0;
         box-sizing: border-box;
@@ -38,9 +38,9 @@ const htmlPageForResetPass = (logo, url) => {
               gap: 15px;
             "
           >
-            <img src=${logo} alt="logo" />
+            <img src=${""} alt="logo" />
             <div style="color: aliceblue; font-size: 26px; font-weight: 100">
-              Accutures
+              My YouTube Playlist
             </div>
           </div>
           <div
@@ -80,7 +80,7 @@ const htmlPageForResetPass = (logo, url) => {
               height: 40px;
               margin-left: 32%;
               margin-right: 32%;
-              background: #56c493;
+              background: #040e3b;
               color: aliceblue;
               font-size: 13px;
               font-weight: 900;

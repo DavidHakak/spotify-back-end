@@ -29,7 +29,9 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 
-  imageData: { type: String, default: "" },
+  imageData: { type: String },
+
+  resetPass: { type: String },
 
   createDate: {
     type: Date,

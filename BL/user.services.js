@@ -90,7 +90,7 @@ async function getUserForResetPass(email) {
 
   if (!done) throw "create token for change pass failed";
 
-  const url = `${process.env.BASE_URL}/renew/?token=${token}`;
+  const url = `${process.env.BASE_URL}/user/renew/?token=${token}`;
 
   const emailOptions = {
     from: process.env.EMAIL_USER,
